@@ -14,12 +14,17 @@ is_game_over = False
 start_time = None
 score = 1
 best_bird = None
+bird_on_display = None  # determines which birds to draw vector lines
 best_score = 1
+generation = 0
 
 # initializing constants
+MACHINE_LEARNING_MODE = False
+VECTOR_DEBUG_MODE = False
 clock = pygame.time.Clock()
 GRAVITY = 120
 VELOCITY = 210
+NUM_OF_BIRDS = 200 if MACHINE_LEARNING_MODE else 1
 screen = pygame.display.set_mode((576, 1024))
 
 # creating score text
@@ -49,6 +54,8 @@ pipe_surface = pygame.image.load("asset/pipe-green.png").convert_alpha()
 pipe_surface = pygame.transform.scale2x(pipe_surface)
 red_pipe_surface = pygame.image.load("asset/pipe-red.png").convert_alpha()
 red_pipe_surface = pygame.transform.scale2x(red_pipe_surface)
+if not VECTOR_DEBUG_MODE:
+    red_pipe_surface = pipe_surface
 
 pipe_list = []
 pipe_height = [400, 600, 800]
@@ -64,7 +71,8 @@ def create_pipe():
 
 # creating birds
 birds = []
-for n in range(200):
+UPDATE_BIRD_ON_DISPLAY = pygame.USEREVENT
+for n in range(NUM_OF_BIRDS):
     birds.append(Bird(False))
 
 # feeding bird images
@@ -103,8 +111,9 @@ def reset_game():
 
 def force_game_start():
     reset_game()
-    global is_game_over
+    global is_game_over, bird_on_display
     is_game_over = False
+    bird_on_display = best_bird
     for b in birds:
         b.jump()
 
@@ -115,11 +124,11 @@ def draw_input_lines(surf, b, close_pipes):
     pygame.draw.line(surf, [0, 255, 0], (197, b.y), (close_pipes[0].x, close_pipes[0].top), width=3)
 
 
-def create_text_surface(text, x, y):
-    score_surface = font.render(text, True, (0, 0, 0))
-    score_rect = score_surface.get_rect()
-    score_rect.center = (x, y)
-    return score_surface, score_rect
+def create_text_surface(text, x, y, color):
+    text_surface = font.render(text, True, color)
+    text_rect = text_surface.get_rect()
+    text_rect.center = (x, y)
+    return text_surface, text_rect
 
 
 while True:
@@ -141,6 +150,9 @@ while True:
             if len(pipe_list) > 4:
                 pipe_list.pop(0)
                 pipe_list.pop(0)
+        if event.type == UPDATE_BIRD_ON_DISPLAY and game_active and best_bird is not None:
+            if not best_bird.alive:
+                bird_on_display = get_bird_to_display(birds)
 
     if len(pipe_list) == 0 and game_active:
         pipe_list.extend(create_pipe())
@@ -149,7 +161,7 @@ while True:
     screen.blit(background, (0, 0))
     dt = clock.tick(200) / 1000
 
-    update_birds(birds, GRAVITY, VELOCITY, dt)
+    update_birds(birds, GRAVITY, VELOCITY, MACHINE_LEARNING_MODE, dt)
     update_pipes(pipe_list, VELOCITY, dt, game_active)
     closest_pipes_temp = None
     if len(pipe_list) > 0:
@@ -162,16 +174,19 @@ while True:
         for bird in birds:
             if bird.alive:
                 closest_pipes = get_closest_pipes(pipe_list, 156)
-                distance_to_pipe = closest_pipes[1].x - 156
                 distance_to_bottom = closest_pipes[0].top - bird.y
                 distance_to_top = bird.y - closest_pipes[1].bottom
-                if bird.color == 'blue':
-                    draw_input_lines(screen, bird, closest_pipes)
-                if bird.calculate_jump(distance_to_pipe, distance_to_bottom, distance_to_top):
-                    bird.jump()
+                if MACHINE_LEARNING_MODE:
+                    if bird == bird_on_display and VECTOR_DEBUG_MODE:
+                        draw_input_lines(screen, bird_on_display, closest_pipes)
+                    if bird.calculate_jump(distance_to_bottom, distance_to_top):
+                        bird.jump()
                 if check_collision(bird, pipe_list):
                     bird.alive = False
-                    if not check_if_game_stop(birds):
+                    if bird == best_bird:
+                        bird_on_display = get_bird_to_display(birds)
+                    if not check_if_game_stop(birds) and MACHINE_LEARNING_MODE:
+                        generation += 1
                         if score > best_score:
                             best_score = score
                             print('new score: ', best_score)
@@ -187,22 +202,17 @@ while True:
         else:
             screen.blit(menu_surface, menu_rect)
         # resets the game and force all birds to jump
-        force_game_start()
+        if MACHINE_LEARNING_MODE:
+            force_game_start()
 
     score_surfaces = create_score_surfaces(font, score, is_game_over)
     screen.blit(score_surfaces[1][0], score_surfaces[1][1])
     screen.blit(score_surfaces[0][0], score_surfaces[0][1])
-    if best_bird is not None and len(pipe_list) > 0:
-        close_pipes = get_closest_pipes(pipe_list, best_bird.x)
-        d_to_pipe = int(close_pipes[0].x - 156)
-        d_to_top = int(close_pipes[1].bottom - best_bird.y)
-        d_to_bottom = int(best_bird.y - close_pipes[1].top)
-        text_d_to_pipe = create_text_surface(str(d_to_pipe), 40, 40)
-        text_d_to_top = create_text_surface(str(d_to_top), 40, 80)
-        text_d_to_bottom = create_text_surface(str(d_to_bottom), 40, 120)
-        screen.blit(text_d_to_pipe[0], text_d_to_pipe[1])
-        screen.blit(text_d_to_top[0], text_d_to_top[1])
-        screen.blit(text_d_to_bottom[0], text_d_to_bottom[1])
+    if MACHINE_LEARNING_MODE:
+        generation_text = create_text_surface("Gen:" + str(generation), 80, 50, (255, 255, 255))
+        generation_text_outline = create_text_surface("Gen:" + str(generation), 85, 55, (84, 56, 71))
+        screen.blit(generation_text_outline[0], generation_text_outline[1])
+        screen.blit(generation_text[0], generation_text[1])
     pygame.display.update()
 
 # def updateImage():

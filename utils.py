@@ -1,12 +1,12 @@
-def update_birds(birds, gravity, velocity, dt):
+def update_birds(birds, gravity, velocity, machine_learning_mode, dt):
     for x in range(len(birds)):
         if birds[x].has_jumped:
-            updatePosition(birds[x], gravity, velocity, dt)
+            updatePosition(birds[x], gravity, velocity, machine_learning_mode, dt)
 
 
-def updatePosition(birdToUpdate, gravity, velocity, dt):
+def updatePosition(birdToUpdate, gravity, velocity, machine_learning_mode, dt):
     birdToUpdate.v += 25 * gravity * dt
-    if birdToUpdate.alive is False:
+    if birdToUpdate.alive is False and machine_learning_mode:
         birdToUpdate.setX(birdToUpdate.x - velocity * dt * 2)
 
     birdToUpdate.setY(birdToUpdate.y + birdToUpdate.v * dt + gravity * dt)
@@ -142,3 +142,8 @@ def create_score_surfaces(font, score, is_game_over):
     score_rect.center = (offset_x - delta_x, offset_y)
     return (score_surface, score_rect), (score_surface_outline, score_rect_outline)
 
+
+def get_bird_to_display(birds):
+    for bird in birds:
+        if bird.alive:
+            return bird

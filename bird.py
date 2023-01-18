@@ -87,7 +87,7 @@ class Bird:
             else:
                 self.genes[j].append(random.uniform(-1, 1))
 
-    def calculate_jump(self, distance_to_pipe, distance_to_bottom_pipe, distance_to_top_pipe):
+    def calculate_jump(self, distance_to_bottom_pipe, distance_to_top_pipe):
         input_nodes = calculate_input_nodes_linear(self.y, distance_to_bottom_pipe, distance_to_top_pipe)
         hidden_nodes = []
         for i in range(3):
