@@ -67,33 +67,33 @@ class Bird:
             self.v = -900
 
     def create_genes(self):
-        for i in range(16):
+        for i in range(9):
             self.create_one_gene(i, 0)
-        for i in range(4):
+        for i in range(3):
             self.create_one_gene(i, 1)
-        self.create_one_gene(0, 2)
+        for i in range(4):
+            self.create_one_gene(i, 2)
 
     def create_one_gene(self, i, j):
         if self.parent_genes is None:
             self.genes[j].append(random.uniform(-1, 1))
         else:
-            if random.random() < 0.93:
+            if random.random() < 0.9:
                 self.genes[j].append(self.parent_genes[j][i])
-            elif random.random() < 0.5:
-                lower = self.parent_genes[j][i] - 0.4 if self.parent_genes[j][i] - 0.4 >= 0 else 0
-                upper = self.parent_genes[j][i] + 0.4 if self.parent_genes[j][i] + 0.4 <= 1 else 1
-                self.genes[j].append(random.uniform(lower, upper))
+            # elif random.random() < 0.5:
+                # lower = self.parent_genes[j][i] - 0.6 if self.parent_genes[j][i] - 0.6 >= 0 else 0
+                # upper = self.parent_genes[j][i] + 0.6 if self.parent_genes[j][i] + 0.6 <= 1 else 1
+                # self.genes[j].append(random.uniform(lower, upper))
             else:
                 self.genes[j].append(random.uniform(-1, 1))
 
     def calculate_jump(self, distance_to_pipe, distance_to_bottom_pipe, distance_to_top_pipe):
-        input_nodes = calculate_input_nodes_linear(self.y, self.v,
-                                                distance_to_bottom_pipe, distance_to_top_pipe)
+        input_nodes = calculate_input_nodes_linear(self.y, distance_to_bottom_pipe, distance_to_top_pipe)
         hidden_nodes = []
-        for i in range(4):
-            upper = (i+1)*4
-            hidden_nodes.append(sig_output(numpy.dot(input_nodes, self.genes[0][i*4:upper])))
-        output = binary_output(numpy.dot(hidden_nodes, self.genes[1]) + self.genes[2][0])
+        for i in range(3):
+            upper = (i+1)*3
+            hidden_nodes.append(sig_output(numpy.dot(input_nodes, self.genes[0][i*3:upper])) + self.genes[2][i])
+        output = binary_output(numpy.dot(hidden_nodes, self.genes[1]) + self.genes[2][3])
         return True if output == 1 else False
 
     def getAngle(self):
