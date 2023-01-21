@@ -80,7 +80,7 @@ class Bird:
         else:
             if random.random() < 0.9:
                 self.genes[j].append(self.parent_genes[j][i])
-            # elif random.random() < 0.5:
+            # elif random.random() < 0.5: # statement for a slight variation of the parent genes
                 # lower = self.parent_genes[j][i] - 0.6 if self.parent_genes[j][i] - 0.6 >= 0 else 0
                 # upper = self.parent_genes[j][i] + 0.6 if self.parent_genes[j][i] + 0.6 <= 1 else 1
                 # self.genes[j].append(random.uniform(lower, upper))

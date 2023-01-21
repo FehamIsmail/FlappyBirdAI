@@ -7,7 +7,7 @@ def update_birds(birds, gravity, velocity, machine_learning_mode, dt):
 def updatePosition(birdToUpdate, gravity, velocity, machine_learning_mode, dt):
     birdToUpdate.v += 25 * gravity * dt
     if birdToUpdate.alive is False and machine_learning_mode:
-        birdToUpdate.setX(birdToUpdate.x - velocity * dt * 2)
+        birdToUpdate.setX(birdToUpdate.x - velocity * dt)
 
     birdToUpdate.setY(birdToUpdate.y + birdToUpdate.v * dt + gravity * dt)
 
@@ -38,7 +38,7 @@ def blit_rotate(surf, image, pos, originPos, angle, pygame):
 
 
 def render_floor(surf, floor, floor_pos, velocity, dt, game_active):
-    floor_delta_x = velocity * dt * 1.45
+    floor_delta_x = velocity * dt
     if game_active:
         floor_pos.x -= floor_delta_x if floor_pos.x > -floor_pos.w else -floor_pos.w
     surf.blit(floor, (floor_pos.x, 900))
@@ -92,7 +92,7 @@ def update_pipes(pipes, velocity, dt, game_active):
     if game_active:
         for pipe in pipes:
             if pipe is not None:
-                pipe.x -= velocity * dt
+                pipe.x -= velocity * dt / 2
     return pipes
 
 
@@ -119,14 +119,9 @@ def get_closest_pipes(pipe_list, bird_x_pos):
         return pipe_list[0], pipe_list[1]
     is_pipe_behind = pipe_list[1].x < bird_x_pos - pipe_list[0].width
     if is_pipe_behind:
-        # print('pipe behind: ', counter)
-        # print('returning last two')
         return pipe_list[2], pipe_list[3]
     else:
-        # print('returning first two')
         return pipe_list[0], pipe_list[1]
-
-     # if is_pipe_behind else
 
 
 def create_score_surfaces(font, score, is_game_over):

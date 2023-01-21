@@ -19,12 +19,12 @@ best_score = 1
 generation = 0
 
 # initializing constants
-MACHINE_LEARNING_MODE = False
-VECTOR_DEBUG_MODE = False
+MACHINE_LEARNING_MODE = True
+VECTOR_DEBUG_MODE = True
 clock = pygame.time.Clock()
 GRAVITY = 120
-VELOCITY = 210
-NUM_OF_BIRDS = 200 if MACHINE_LEARNING_MODE else 1
+VELOCITY = 420
+NUM_OF_BIRDS = 70 if MACHINE_LEARNING_MODE else 1
 screen = pygame.display.set_mode((576, 1024))
 
 # creating score text
@@ -156,7 +156,7 @@ while True:
 
     if len(pipe_list) == 0 and game_active:
         pipe_list.extend(create_pipe())
-        pygame.time.set_timer(SPAWNPIPE, 1600)
+        pygame.time.set_timer(SPAWNPIPE, int(672000 / VELOCITY))
 
     screen.blit(background, (0, 0))
     dt = clock.tick(200) / 1000
